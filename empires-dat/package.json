@@ -1,0 +1,9 @@
+{
+  "name": "empires-dat",
+  "version": "1.0.0",
+  "description": "Process genie-dat data files",
+  "main": "index.js",
+  "repository": "https://github.com/tomwwright/aoe2de-stats",
+  "author": "tomwwright",
+  "license": "GPL-3.0-or-later"
+}
