@@ -55,6 +55,10 @@ type Civilisation = {
   buildings: Building[];
 };
 
+export type EmpiresDat = {
+  civilisations: Civilisation[];
+};
+
 export class Parser {
   private strings: { [id: string]: string };
 
@@ -105,7 +109,7 @@ export class Parser {
     this.strings = strings;
   }
 
-  parse(data: RawEmpiresDat) {
+  parse(data: RawEmpiresDat): EmpiresDat {
     const parsed = {
       civilisations: [] as Civilisation[]
     };
@@ -198,14 +202,14 @@ if (require.main === module) {
 
   console.log(`Input Dat: ${inputDatFilename}\nInput Strings: ${inputStringsFilename}\nOutput: ${outputFilename}`);
 
-  const empiresDat: RawEmpiresDat = JSON.parse(fs.readFileSync(inputDatFilename).toString());
+  const rawEmpiresDat: RawEmpiresDat = JSON.parse(fs.readFileSync(inputDatFilename).toString());
   const empiresStrings: EmpiresStrings = JSON.parse(fs.readFileSync(inputStringsFilename).toString());
 
   const parser = new Parser(empiresStrings.strings);
 
-  const parsed = parser.parse(empiresDat);
+  const empiresDat = parser.parse(rawEmpiresDat);
 
-  console.log(`Civilisations: ${parsed.civilisations.length}`);
+  console.log(`Civilisations: ${empiresDat.civilisations.length}`);
 
-  fs.writeFileSync(outputFilename, JSON.stringify(parsed));
+  fs.writeFileSync(outputFilename, JSON.stringify(empiresDat));
 }
