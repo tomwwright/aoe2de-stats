@@ -12,6 +12,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "strings": "node .build/empires-strings.js"
+    "run:strings": "node .build/empires-strings.js",
+    "run:dat": "node .build/empires-dat.js"
   }
 }
