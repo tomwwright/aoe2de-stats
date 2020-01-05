@@ -5,5 +5,9 @@
   "main": "index.js",
   "repository": "https://github.com/tomwwright/aoe2de-stats",
   "author": "tomwwright",
-  "license": "GPL-3.0-or-later"
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "@types/node": "^13.1.4",
+    "typescript": "^3.7.4"
+  }
 }
