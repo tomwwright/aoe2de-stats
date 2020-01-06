@@ -1,5 +1,15 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Empires Stats App Notes
+
+### empires-dat.json
+
+Add `empires-dat.json` symlink to `public` so it can be loaded by the app.
+
+```sh
+ln -s ../../empires-dat/dat/empires-dat.json public/empires-dat.json
+```
+
 ## Available Scripts
 
 In the project directory, you can run:
