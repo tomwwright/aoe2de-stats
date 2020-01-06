@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import { RawEmpiresDat, RawCivilization, RawCombatObject, RawBuildingObject } from "./raw-empires-dat";
+import { RawEmpiresDat, RawCivilization, RawCombatObject, RawBuildingObject, RawTech, RawResearch } from "./raw-empires-dat";
 import { EmpiresStrings } from "./empires-strings";
 
 type Unit = {
@@ -55,8 +55,33 @@ type Civilisation = {
   buildings: Building[];
 };
 
+type Tech = {
+  effects: {
+    type: number;
+    unit: number;
+    unitClassId: number;
+    attributeId: number;
+    amount: number;
+  }[];
+  name: string;
+};
+
+type Research = {
+  civilisationId: number;
+  internalName: string;
+  name: string;
+  researchLocationId: number;
+  researchTime: number;
+  resourceCosts: {
+    [type: string]: number;
+  };
+  techId: number;
+};
+
 export type EmpiresDat = {
   civilisations: Civilisation[];
+  techs: Tech[];
+  researches: Research[];
 };
 
 export class Parser {
@@ -111,11 +136,21 @@ export class Parser {
 
   parse(data: RawEmpiresDat): EmpiresDat {
     const parsed = {
-      civilisations: [] as Civilisation[]
+      civilisations: [] as Civilisation[],
+      techs: [] as Tech[],
+      researches: [] as Research[]
     };
 
     for (const raw of data.civilizations) {
       parsed.civilisations.push(this.parseCivilisation(raw));
+    }
+
+    for (const raw of data.techs) {
+      parsed.techs.push(this.parseTech(raw));
+    }
+
+    for (const raw of data.researches) {
+      parsed.researches.push(this.parseResearch(raw));
     }
 
     return parsed;
@@ -169,10 +204,12 @@ export class Parser {
         minimum: raw.weaponRangeMin,
         maximum: raw.weaponRangeMax
       },
-      resourceCosts: raw.resourceCost.reduce((obj, v) => {
-        obj[this.lookups.resourceTypes[v.type]] = v.amount;
-        return obj;
-      }, {} as { [type: string]: number }),
+      resourceCosts: raw.resourceCost
+        .filter(r => r.enabled)
+        .reduce((obj, v) => {
+          obj[this.lookups.resourceTypes[v.type]] = v.amount;
+          return obj;
+        }, {} as { [type: string]: number }),
       rearAttackModifier: raw.rearAttackModifier
     };
 
@@ -190,6 +227,30 @@ export class Parser {
     };
 
     return building;
+  }
+
+  private parseTech(raw: RawTech): Tech {
+    return {
+      name: raw.name.value,
+      effects: raw.effects
+    };
+  }
+
+  private parseResearch(raw: RawResearch): Research {
+    return {
+      civilisationId: raw.civilizationId,
+      internalName: raw.name.value,
+      name: this.strings[raw.languageDllName],
+      researchLocationId: raw.researchLocationId,
+      researchTime: raw.researchTime,
+      resourceCosts: raw.resourceCosts
+        .filter(r => r.enabled)
+        .reduce((obj, v) => {
+          obj[this.lookups.resourceTypes[v.resourceId]] = v.amount;
+          return obj;
+        }, {} as { [type: string]: number }),
+      techId: raw.techEffectId
+    };
   }
 }
 
@@ -210,6 +271,8 @@ if (require.main === module) {
   const empiresDat = parser.parse(rawEmpiresDat);
 
   console.log(`Civilisations: ${empiresDat.civilisations.length}`);
+  console.log(`Techs: ${empiresDat.techs.length}`);
+  console.log(`Researches: ${empiresDat.researches.length}`);
 
   fs.writeFileSync(outputFilename, JSON.stringify(empiresDat));
 }

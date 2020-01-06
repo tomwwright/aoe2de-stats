@@ -50,10 +50,10 @@ export type RawEmpiresDat = {
   randomMapPointer: number;
   randomMapInfo: object[];
   randomMaps: object[];
-  techs: object[];
+  techs: RawTech[];
   objectHeaders: object[];
   civilizations: RawCivilization[];
-  researches: object[];
+  researches: RawResearch[];
   timeSlice: number;
   unitKillRate: number;
   unitKillTotal: number;
@@ -62,6 +62,45 @@ export type RawEmpiresDat = {
   razingKillRate: number;
   razingKillTotal: number;
   techTree: object[];
+};
+
+type RawResearch = {
+  requiredTechIds: number[];
+  resourceCosts: {
+    resourceId: number;
+    amount: number;
+    enabled: boolean;
+  }[];
+  requiredTechCount: number;
+  civilizationId: number;
+  fullTechMode: number;
+  researchLocationId: number;
+  languageDllName: number;
+  languageDllDescription: number;
+  researchTime: number;
+  techEffectId: number;
+  techType: number;
+  iconId: number;
+  buttonId: number;
+  languageDllHelp: number;
+  languageDllTechTree: number;
+  hotkey: number;
+  name: {
+    value: string;
+  };
+};
+
+type RawTech = {
+  name: {
+    value: string;
+  };
+  effects: {
+    type: number;
+    unit: number;
+    unitClassId: number;
+    attributeId: number;
+    amount: number;
+  }[];
 };
 
 type RawCivilization = {
