@@ -2,7 +2,9 @@ import React, { Component } from "react";
 import { EmpiresDat } from "../../empires-dat/src/empires-dat";
 
 const defaultEmpiresDat: EmpiresDat = {
-  civilisations: []
+  civilisations: [],
+  techs: [],
+  researches: []
 };
 
 export const EmpiresDatContext = React.createContext(defaultEmpiresDat);
