@@ -58,14 +58,62 @@ export type Civilisation = {
 };
 
 export type Tech = {
-  effects: {
-    type: number;
-    unit: number;
-    unitClassId: number;
-    attributeId: number;
-    amount: number;
-  }[];
+  effects: TechEffect[];
   name: string;
+};
+
+export type TechEffect = DisabledTech | AttributeTechEffect | ResourceTechEffect | ToggleObjectTechEffect | UpgradeObjectTechEffect | TechTechEffect | DisableTechTechEffect;
+
+type TechEffectType = TechEffect["type"];
+
+type DisabledTech = {
+  type: "DISABLED";
+};
+
+type AttributeTechEffect = {
+  type: "ATTRIBUTE_ABSSET" | "ATTRIBUTE_RELSET" | "ATTRIBUTE_MUL" | "TEAM_ATTRIBUTE_ABSSET" | "TEAM_ATTRIBUTE_RELSET" | "TEAM_ATTRIBUTE_MUL";
+  typeId: number;
+  id: number;
+  classId: number;
+  attributeId: number;
+  attributeClassId?: number;
+  value: number;
+};
+
+type ResourceTechEffect = {
+  type: "RESOURCE_MODIFY" | "RESOURCE_MUL" | "TEAM_RESOURCE_MODIFY" | "TEAM_RESOURCE_MUL";
+  typeId: number;
+  resourceId: number;
+  isRelative: boolean;
+  value: number;
+};
+
+type ToggleObjectTechEffect = {
+  type: "OBJECT_TOGGLE" | "TEAM_OBJECT_TOGGLE";
+  typeId: number;
+  id: number;
+  isEnabled: boolean;
+};
+type UpgradeObjectTechEffect = {
+  type: "OBJECT_UPGRADE" | "TEAM_OBJECT_UPGRADE";
+  typeId: number;
+  oldId: number;
+  newId: number;
+};
+
+type TechTechEffect = {
+  type: "TECH_COST_MODIFY" | "TECH_TIME_MODIFY";
+  typeId: number;
+  id: number;
+  attributeId: number;
+  isRelative: boolean;
+  value: number;
+};
+
+type DisableTechTechEffect = {
+  type: "TECH_TOGGLE";
+  typeId: number;
+  id: number;
 };
 
 export type Research = {
@@ -129,7 +177,27 @@ export class Parser {
       34: "Fishing Ships",
       35: "Mamelukes",
       36: "Heroes & Kings"
-    } as { [type: number]: string }
+    } as { [type: number]: string },
+    techEffectTypes: {
+      "-1": "DISABLED",
+      0: "ATTRIBUTE_ABSSET",
+      1: "RESOURCE_MODIFY",
+      2: "OBJECT_TOGGLE",
+      3: "OBJECT_UPGRADE",
+      4: "ATTRIBUTE_RELSET",
+      5: "ATTRIBUTE_MUL",
+      6: "RESOURCE_MUL",
+      10: "TEAM_ATTRIBUTE_ABSSET",
+      11: "TEAM_RESOURCE_MODIFY",
+      12: "TEAM_OBJECT_TOGGLE",
+      13: "TEAM_OBJECT_UPGRADE",
+      14: "TEAM_ATTRIBUTE_RELSET",
+      15: "TEAM_ATTRIBUTE_MUL",
+      16: "TEAM_RESOURCE_MUL",
+      101: "TECH_COST_MODIFY",
+      102: "TECH_TOGGLE",
+      103: "TECH_TIME_MODIFY"
+    } as { [type: number]: TechEffectType }
   };
 
   constructor(strings: { [id: string]: string }) {
@@ -236,7 +304,90 @@ export class Parser {
   private parseTech(raw: RawTech): Tech {
     return {
       name: raw.name.value,
-      effects: raw.effects
+      effects: raw.effects.map(rawEffect => this.parseTechEffect(rawEffect))
+    };
+  }
+
+  private parseTechEffect(raw: RawTech["effects"][number]): TechEffect {
+    const typeId = raw.type;
+    const type: any = this.lookups.techEffectTypes[raw.type];
+    if ([0, 4, 5, 10, 14, 15].includes(typeId)) {
+      // attribute effects
+      const effect = {
+        type,
+        typeId,
+        id: raw.unit,
+        classId: raw.unitClassId,
+        attributeId: raw.attributeId,
+        value: raw.amount
+      };
+      if (effect.attributeId == 8 || effect.attributeId == 9) {
+        return {
+          ...effect,
+          ...this.parseTechEffectAttributeValue(effect.value)
+        };
+      } else {
+        return effect;
+      }
+    } else if ([1, 6, 11, 16].includes(typeId)) {
+      // resource effects
+      return {
+        type,
+        typeId,
+        resourceId: raw.unit,
+        isRelative: raw.unitClassId == 1,
+        value: raw.amount
+      };
+    } else if ([2, 12].includes(typeId)) {
+      // toggle object effect
+      return {
+        type,
+        typeId,
+        id: raw.unit,
+        isEnabled: raw.unitClassId == 1
+      };
+      // upgrade object effect
+    } else if ([3, 13].includes(typeId)) {
+      return {
+        type,
+        typeId,
+        oldId: raw.unit,
+        newId: raw.unitClassId
+      };
+    } else if ([101, 103].includes(typeId)) {
+      // tech effect
+      return {
+        type,
+        typeId,
+        attributeId: raw.unit,
+        isRelative: raw.attributeId == 1,
+        value: raw.amount
+      };
+    } else if (typeId == 102) {
+      // disable tech effect
+      return {
+        type,
+        typeId,
+        id: raw.amount
+      };
+    }
+
+    return {
+      type,
+      typeId
+    };
+  }
+
+  private parseTechEffectAttributeValue(value: number) {
+    let attributeClassId = 0;
+    while (value > 256) {
+      attributeClassId += 1;
+      value -= 256;
+    }
+
+    return {
+      attributeClassId,
+      value
     };
   }
 
