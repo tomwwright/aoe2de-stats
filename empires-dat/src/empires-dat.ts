@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { RawEmpiresDat, RawCivilization, RawCombatObject, RawBuildingObject, RawTech, RawResearch } from "./raw-empires-dat";
 import { EmpiresStrings } from "./empires-strings";
 
-type Unit = {
+export type Unit = {
   id: number;
   type: number;
   name: string;
@@ -42,13 +42,13 @@ type Unit = {
   rearAttackModifier: number;
 };
 
-type Building = Unit & {
+export type Building = Unit & {
   garrisonType: number;
   garrisonHealRate: number;
   garrisonRepairRate: number;
 };
 
-type Civilisation = {
+export type Civilisation = {
   name: string;
   iconSetId: number;
   techTreeId: number;
@@ -57,7 +57,7 @@ type Civilisation = {
   buildings: Building[];
 };
 
-type Tech = {
+export type Tech = {
   effects: {
     type: number;
     unit: number;
@@ -68,7 +68,7 @@ type Tech = {
   name: string;
 };
 
-type Research = {
+export type Research = {
   civilisationId: number;
   internalName: string;
   name: string;
