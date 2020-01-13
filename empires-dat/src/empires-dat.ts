@@ -22,6 +22,8 @@ type Unit = {
     [type: string]: number;
   };
   blastRange: number;
+  creationLocationId: number;
+  creationTime: number;
   displayed: {
     attack: number;
     meleeArmour: number;
@@ -192,6 +194,8 @@ export class Parser {
         return obj;
       }, {} as { [type: string]: number }),
       blastRange: raw.blastRange,
+      creationLocationId: raw.creationLocationId,
+      creationTime: raw.creationTime,
       displayed: {
         attack: raw.attackDisplayed,
         meleeArmour: raw.meleeArmorDisplayed,
