@@ -11,13 +11,17 @@ import "ag-grid-community/dist/styles/ag-theme-balham.css";
 import { TechList } from "./TechList";
 import { ResearchList } from "./ResearchList";
 import { UnitAndBuildingList } from "./UnitAndBuildingList";
+import { UnitsTable } from "./UnitsTable";
 
 const App: React.FC = () => {
   return (
     <EmpiresDatProvider>
       <BrowserRouter>
-        <Button color="primary" variant="contained" component={RouterLink} to="/unitsbuildings">
-          Units and Buildings
+        <Button color="primary" variant="contained" component={RouterLink} to="/units">
+          Units
+        </Button>
+        <Button color="primary" variant="contained" component={RouterLink} to="/rawunitsbuildings">
+          Raw Units and Buildings
         </Button>
         <Button color="primary" variant="contained" component={RouterLink} to="/civilisations">
           Civilisations
@@ -29,7 +33,10 @@ const App: React.FC = () => {
           Researches
         </Button>
         <Switch>
-          <Route path="/unitsbuildings">
+          <Route path="/units">
+            <UnitsTable />
+          </Route>
+          <Route path="/rawunitsbuildings">
             <UnitAndBuildingList />
           </Route>
           <Route path="/civilisations">
