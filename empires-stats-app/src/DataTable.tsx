@@ -1,6 +1,6 @@
 import React from "react";
 import { ColDef } from "ag-grid-community";
-import { AgGridReact } from "ag-grid-react";
+import { Table } from "./Table";
 import _ from "lodash";
 
 type DataTableProps = {
@@ -14,17 +14,7 @@ export const DataTable: React.StatelessComponent<DataTableProps> = ({ data }) =>
 
   const dataWithRowId = withRowIdColumn(data);
 
-  return (
-    <div
-      className="ag-theme-balham"
-      style={{
-        height: "600px",
-        width: "100%"
-      }}
-    >
-      <AgGridReact columnDefs={extractHeaders(dataWithRowId)} rowData={dataWithRowId}></AgGridReact>
-    </div>
-  );
+  return <Table columnDefs={extractHeaders(dataWithRowId)} rowData={dataWithRowId}></Table>;
 };
 
 const extractHeaders = (rows: object[]): ColDef[] => {
