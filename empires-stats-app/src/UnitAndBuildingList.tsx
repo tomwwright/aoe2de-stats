@@ -6,7 +6,7 @@ import { DataTable } from "./DataTable";
 export const UnitAndBuildingList: React.StatelessComponent<{}> = () => {
   const empires = useContext(EmpiresDatContext);
 
-  const unitsAndBuildings = ([] as any[]).concat(empires.civilisations[0].units, empires.civilisations[0].buildings);
+  const unitsAndBuildings = empires.civilisations[0] ? ([] as any[]).concat(empires.civilisations[0].units, empires.civilisations[0].buildings) : [];
 
   return <DataTable data={unitsAndBuildings} />;
 };
