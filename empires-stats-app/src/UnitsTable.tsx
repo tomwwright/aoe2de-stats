@@ -55,6 +55,7 @@ const constructUnitsTableData = (empires: EmpiresDat) => {
         .map(armour => `${armour[0]}${armour[1] > 0 ? ` (+${armour[1]})` : ""}`)
         .join(", "),
       attackBonuses: Object.entries(unit.attackBonuses)
+        .filter(attack => attack[1] > 0)
         .sort((a, b) => b[1] - a[1])
         .map(attack => `+${attack[1]} ${attack[0]}`)
         .join(", ")
