@@ -12,6 +12,7 @@ import { TechList } from "./TechList";
 import { ResearchList } from "./ResearchList";
 import { UnitAndBuildingList } from "./UnitAndBuildingList";
 import { UnitsTable } from "./UnitsTable";
+import { ResearchTable } from "./ResearchTable";
 
 const App: React.FC = () => {
   return (
@@ -32,6 +33,9 @@ const App: React.FC = () => {
         <Button color="primary" variant="contained" component={RouterLink} to="/researches">
           Researches
         </Button>
+        <Button color="primary" variant="contained" component={RouterLink} to="/rawresearches">
+          Raw Researches
+        </Button>
         <Switch>
           <Route path="/units">
             <UnitsTable />
@@ -46,6 +50,9 @@ const App: React.FC = () => {
             <TechList />
           </Route>
           <Route path="/researches">
+            <ResearchTable />
+          </Route>
+          <Route path="/rawresearches">
             <ResearchList />
           </Route>
         </Switch>
