@@ -1,5 +1,6 @@
 import * as fs from "fs";
-import { RawEmpiresDat, RawCivilization, RawCombatObject, RawBuildingObject, RawTech, RawResearch } from "./raw-empires-dat";
+import _ from "lodash";
+import { RawEmpiresDat, RawCivilization, RawCombatObject, RawBuildingObject, RawTech, RawResearch, RawBaseCombatObject } from "./raw-empires-dat";
 import { EmpiresStrings } from "./empires-strings";
 
 export type Unit = {
@@ -15,13 +16,15 @@ export type Unit = {
   turnRadiusSpeed: number;
   accuracyDispersion: number;
   attackSpeed: number;
-  attacks: {
+  attackType: string;
+  attackBonuses: {
     [type: string]: number;
   };
   armours: {
     [type: string]: number;
   };
   blastRange: number;
+  class: string;
   creationLocationId: number;
   creationTime: number;
   displayed: {
@@ -32,6 +35,8 @@ export type Unit = {
   };
   flankAttackModifier: number;
   frameDelay: number;
+  meleeArmour: number;
+  pierceArmour: number;
   range: {
     minimum: number;
     maximum: number;
@@ -145,6 +150,10 @@ export class Parser {
       3: "GOLD",
       4: "POPULATION"
     } as { [type: number]: string },
+    // armour class names from 124xx strings
+    armourClassBaseMelee: 4,
+    armourClassBasePierce: 3,
+    armourClassLeitisAttack: 31,
     armourClasses: {
       1: "Infantry",
       2: "Turtle Ships",
@@ -197,7 +206,72 @@ export class Parser {
       101: "TECH_COST_MODIFY",
       102: "TECH_TOGGLE",
       103: "TECH_TIME_MODIFY"
-    } as { [type: number]: TechEffectType }
+    } as { [type: number]: TechEffectType },
+    // class names from 133xx strings
+    unitClasses: {
+      0: "Archer",
+      1: "Artifact",
+      2: "Trade Boat",
+      3: "Building",
+      4: "Civilian",
+      5: "Ocean Fish",
+      6: "Infantry",
+      7: "Berry Bush",
+      8: "Stone Mine",
+      9: "Prey Animal",
+      10: "Predator Animal",
+      11: "Miscellaneous",
+      12: "Cavalry",
+      13: "Siege Weapon",
+      14: "Terrain",
+      15: "Tree",
+      16: "Tree Stump",
+      17: "Healer",
+      18: "Monk",
+      19: "Trade Cart",
+      20: "Transport Boat",
+      21: "Fishing Boat",
+      22: "Warship",
+      23: "Conquistador",
+      24: "War Elephant",
+      25: "Hero",
+      26: "Elephant Archer",
+      27: "Wall",
+      28: "Phalanx",
+      29: "Domestic Animal",
+      30: "Flag",
+      31: "Deep Sea Fish",
+      32: "Gold Mine",
+      33: "Shore Fish",
+      34: "Cliff",
+      35: "Petard",
+      36: "Cavalry Archer",
+      37: "Doppelganger",
+      38: "Bird",
+      39: "Gate",
+      40: "Salvage Pile",
+      41: "Resource Pile",
+      42: "Relic",
+      43: "Monk with Relic",
+      44: "Hand Cannoneer",
+      45: "Two Handed Swordsman",
+      46: "Pikeman",
+      47: "Scout",
+      48: "Ore Mine",
+      49: "Farm",
+      50: "Spearman",
+      51: "Packed Unit",
+      52: "Tower",
+      53: "Boarding Boat",
+      54: "Unpacked Siege Unit",
+      55: "Ballista",
+      56: "Raider",
+      57: "Cavalry Raider",
+      58: "Livestock",
+      59: "King",
+      60: "Misc Building",
+      61: "Controlled Animal"
+    } as { [type: number]: string }
   };
 
   constructor(strings: { [id: string]: string }) {
@@ -253,15 +327,8 @@ export class Parser {
       turnRadiusSpeed: raw.turnRadiusSpeed,
       accuracyDispersion: raw.accuracyDispersion,
       attackSpeed: raw.attackSpeed,
-      attacks: raw.attacks.reduce((obj, v) => {
-        obj[this.lookups.armourClasses[v.type]] = v.amount;
-        return obj;
-      }, {} as { [type: string]: number }),
-      armours: raw.armors.reduce((obj, v) => {
-        obj[this.lookups.armourClasses[v.type]] = v.amount;
-        return obj;
-      }, {} as { [type: string]: number }),
       blastRange: raw.blastRange,
+      class: this.lookups.unitClasses[raw.class],
       creationLocationId: raw.creationLocationId,
       creationTime: raw.creationTime,
       displayed: {
@@ -282,10 +349,43 @@ export class Parser {
           obj[this.lookups.resourceTypes[v.type]] = v.amount;
           return obj;
         }, {} as { [type: string]: number }),
-      rearAttackModifier: raw.rearAttackModifier
+      rearAttackModifier: raw.rearAttackModifier,
+      ...this.parseAttacksAndArmours(raw)
     };
 
     return unit;
+  }
+
+  private parseAttacksAndArmours(raw: RawBaseCombatObject) {
+    const rawAttacksMap = raw.attacks.reduce((obj, v) => {
+      obj[v.type] = v.amount;
+      return obj;
+    }, {} as { [type: number]: number });
+
+    const rawArmoursMap = raw.armors.reduce((obj, v) => {
+      obj[v.type] = v.amount;
+      return obj;
+    }, {} as { [type: number]: number });
+
+    return {
+      armours: _.fromPairs(
+        Object.entries(rawArmoursMap)
+          .filter(
+            armour =>
+              armour[0] !== this.lookups.armourClassBasePierce.toString() && armour[0] !== this.lookups.armourClassBaseMelee.toString() && armour[0] !== this.lookups.armourClassLeitisAttack.toString()
+          )
+          .map(armour => [this.lookups.armourClasses[Number.parseInt(armour[0])], armour[1]])
+      ),
+      attackType: Object.keys(rawAttacksMap).includes(this.lookups.armourClassBasePierce.toString()) ? "PIERCE" : "MELEE",
+      attack: rawAttacksMap[this.lookups.armourClassBasePierce] || rawAttacksMap[this.lookups.armourClassBaseMelee],
+      attackBonuses: _.fromPairs(
+        Object.entries(rawAttacksMap)
+          .filter(attack => attack[0] !== this.lookups.armourClassBasePierce.toString() && attack[0] !== this.lookups.armourClassBaseMelee.toString())
+          .map(attack => [this.lookups.armourClasses[Number.parseInt(attack[0])], attack[1]])
+      ),
+      meleeArmour: rawArmoursMap[this.lookups.armourClassBaseMelee],
+      pierceArmour: rawArmoursMap[this.lookups.armourClassBasePierce]
+    };
   }
 
   private parseBuilding(raw: RawBuildingObject): Building {
