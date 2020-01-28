@@ -7,6 +7,7 @@
   "author": "tomwwright",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
+    "@types/lodash": "^4.14.149",
     "@types/node": "^13.1.4",
     "typescript": "^3.7.4"
   },
@@ -14,5 +15,8 @@
     "build": "tsc",
     "run:strings": "node .build/empires-strings.js",
     "run:dat": "node .build/empires-dat.js"
+  },
+  "dependencies": {
+    "lodash": "^4.17.15"
   }
 }
