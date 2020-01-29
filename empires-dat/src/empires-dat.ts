@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import _ from "lodash";
-import { RawEmpiresDat, RawCivilization, RawCombatObject, RawBuildingObject, RawTech, RawResearch, RawBaseCombatObject } from "./raw-empires-dat";
+import { RawEmpiresDat, RawCivilization, RawCombatObject, RawBuildingObject, RawTech, RawResearch, RawBaseCombatObject, RawTechTreeAge } from "./raw-empires-dat";
 import { EmpiresStrings } from "./empires-strings";
 
 export type Unit = {
@@ -133,10 +133,19 @@ export type Research = {
   techId: number;
 };
 
+export type Age = {
+  id: number;
+  name: string;
+  availableUnitIds: number[];
+  availableBuildingIds: number[];
+  availableResearchIds: number[];
+};
+
 export type EmpiresDat = {
   civilisations: Civilisation[];
   techs: Tech[];
   researches: Research[];
+  ages: Age[];
 };
 
 export class Parser {
@@ -282,7 +291,8 @@ export class Parser {
     const parsed = {
       civilisations: [] as Civilisation[],
       techs: [] as Tech[],
-      researches: [] as Research[]
+      researches: [] as Research[],
+      ages: [] as Age[]
     };
 
     for (const raw of data.civilizations) {
@@ -295,6 +305,10 @@ export class Parser {
 
     for (const raw of data.researches) {
       parsed.researches.push(this.parseResearch(raw));
+    }
+
+    for (const raw of data.techTree.ages) {
+      parsed.ages.push(this.parseAge(raw));
     }
 
     return parsed;
@@ -505,6 +519,23 @@ export class Parser {
           return obj;
         }, {} as { [type: string]: number }),
       techId: raw.techEffectId
+    };
+  }
+
+  private parseAge(raw: RawTechTreeAge): Age {
+    const ageNames: { [id: number]: string } = {
+      1: "Dark Age",
+      2: "Feudal Age",
+      3: "Castle Age",
+      4: "Imperial Age"
+    };
+
+    return {
+      id: raw.id,
+      name: ageNames[raw.id],
+      availableUnitIds: raw.units,
+      availableBuildingIds: raw.buildings,
+      availableResearchIds: raw.techs
     };
   }
 }

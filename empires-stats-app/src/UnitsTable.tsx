@@ -15,6 +15,7 @@ export const UnitsTable: React.StatelessComponent<{}> = () => {
   const columns: ColDef[] = [
     { headerName: "Name", field: "name", sortable: true, filter: true, resizable: true },
     { headerName: "Produced at", field: "building.name", sortable: true, filter: true, resizable: true },
+    { headerName: "Age", field: "age.name", sortable: true, filter: true, resizable: true },
     { headerName: "Cost", field: "formatted.costs", sortable: true, filter: true, resizable: true },
     { headerName: "Food", field: "resourceCosts.FOOD", sortable: true, filter: true, resizable: true },
     { headerName: "Wood", field: "resourceCosts.WOOD", sortable: true, filter: true, resizable: true },
@@ -40,11 +41,13 @@ export const UnitsTable: React.StatelessComponent<{}> = () => {
 const constructUnitsTableData = (empires: EmpiresDat) => {
   if (empires.civilisations.length === 0) return [];
 
+  const ages = empires.ages;
   const buildings = empires.civilisations[0].buildings;
   const units = empires.civilisations[0].units;
 
   return units.map(unit => ({
     ...unit,
+    age: ages.find(age => age.availableUnitIds.includes(unit.id)),
     building: buildings.find(building => building.id === unit.creationLocationId),
     formatted: {
       costs: Object.entries(unit.resourceCosts)
