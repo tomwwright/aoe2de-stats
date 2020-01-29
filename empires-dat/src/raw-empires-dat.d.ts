@@ -61,7 +61,7 @@ export type RawEmpiresDat = {
   unitHitPointTotal: number;
   razingKillRate: number;
   razingKillTotal: number;
-  techTree: object[];
+  techTree: RawTechTree;
 };
 
 type RawResearch = {
@@ -349,4 +349,72 @@ type RawBuildingObject = RawCombatObject & {
   garrisonRepairRate: number;
   salvageObjectId: number;
   salvageAttributes: number[];
+};
+
+type RawTechTree = {
+  ageCount: number;
+  buildingCount: number;
+  unitCount: number;
+  researchCount: number;
+  totalUnitTechGroups: number;
+  ages: RawTechTreeAge[];
+  buildings: RawTechTreeBuilding[];
+  units: RawTechTreeUnit[];
+  researchs: RawTechTreeResearch[];
+};
+
+type RawTechTreeCommonPrereqs = {
+  preregsCount: number;
+  preregIds: number[];
+  preregTypes: number[];
+};
+
+type RawTechTreeAge = RawTechTreeCommonPrereqs & {
+  id: number;
+  status: number;
+  buildings: number[];
+  units: number[];
+  techs: number[];
+  buildingLevelCount: number;
+  buildingsPerZone: number[];
+  groupLengthPerZone: number[];
+  maxAgeLength: number;
+  nodeType: number;
+};
+
+type RawTechTreeBuilding = RawTechTreeCommonPrereqs & {
+  id: number;
+  status: number;
+  buildings: number;
+  units: number[];
+  techs: number[];
+  locationInAge: number;
+  unitTechsTotal: number[];
+  unitTechsFirst: number[];
+  nodeType: number;
+  enablingResearch: number;
+};
+
+type RawTechTreeUnit = RawTechTreeCommonPrereqs & {
+  id: number;
+  status: number;
+  buildFrom: number;
+  groupId: number;
+  units: number[];
+  locationInAge: number;
+  requiredResearch: number;
+  nodeType: number;
+  enablingResearch: number;
+};
+
+type RawTechTreeResearch = RawTechTreeCommonPrereqs & {
+  id: number;
+  status: number;
+  researchFrom: number;
+  buildings: number[];
+  units: number[];
+  techs: number[];
+  groupId: number;
+  locationInAge: number;
+  nodeType: number;
 };
