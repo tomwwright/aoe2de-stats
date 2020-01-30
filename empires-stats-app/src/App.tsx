@@ -13,6 +13,7 @@ import { ResearchList } from "./ResearchList";
 import { UnitAndBuildingList } from "./UnitAndBuildingList";
 import { UnitsTable } from "./UnitsTable";
 import { ResearchTable } from "./ResearchTable";
+import { TechsTable } from "./TechsTable";
 
 const App: React.FC = () => {
   return (
@@ -29,6 +30,9 @@ const App: React.FC = () => {
         </Button>
         <Button color="primary" variant="contained" component={RouterLink} to="/techs">
           Techs
+        </Button>
+        <Button color="primary" variant="contained" component={RouterLink} to="/rawtechs">
+          Raw Techs
         </Button>
         <Button color="primary" variant="contained" component={RouterLink} to="/researches">
           Researches
@@ -47,6 +51,9 @@ const App: React.FC = () => {
             <CivilisationList />
           </Route>
           <Route path="/techs">
+            <TechsTable />
+          </Route>
+          <Route path="/rawtechs">
             <TechList />
           </Route>
           <Route path="/researches">
