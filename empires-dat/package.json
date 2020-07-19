@@ -17,6 +17,6 @@
     "run:dat": "node .build/empires-dat.js"
   },
   "dependencies": {
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.19"
   }
 }
